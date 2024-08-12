@@ -1,6 +1,9 @@
-﻿namespace Newsy.API.DTOs.Responses;
+﻿using Newsy.Abstractions.Models;
 
-public class AuthorViewModel : BasicAuthorViewModel
+namespace Newsy.API.DTOs.Responses;
+
+public class AuthorViewModel : BasicAuthorModel
 {
-    public BasicArticleViewModel[] Articles { get; set; }
+    public BasicArticleModel[] Articles { get; set; }
+    public string Bio { get; set; }
 }

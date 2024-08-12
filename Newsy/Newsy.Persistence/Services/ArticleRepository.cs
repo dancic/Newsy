@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newsy.Abstractions.Models;
 using Newsy.Persistence.Contracts.Services;
 using Newsy.Persistence.Extensions;
+using Newsy.Persistence.Helpers;
 using Newsy.Persistence.Models;
 
 namespace Newsy.Persistence.Services;
@@ -29,13 +31,25 @@ public class ArticleRepository : IArticleRepository
         return true;
     }
 
-    public async Task<Article[]> GetArticleGridDataAsync(int pageNumber, int pageSize, string requesterUserId)
+    public async Task<BasicArticleModel[]> GetArticleGridDataAsync(int pageNumber, int pageSize, IEnumerable<Filter> filters, string requesterUserId)
     {
         return await context.Articles
             .Include(a => a.Author)
                 .ThenInclude(a => a.ApplicationUser)
             .Where(a => a.DeletedAt == null && (a.Author.ApplicationUserId == requesterUserId || a.IsPublished))
+            .Select(a => new BasicArticleModel()
+            {
+                Id = a.Id,
+                Title = a.Title,
+                Author = new BasicAuthorModel()
+                {
+                    Id = a.Author.Id,
+                    Name = a.Author.ApplicationUser.FullName
+                }
+            })
+            .Where(FilterExpressionBuilder.GetFiltersExpression<BasicArticleModel>(filters))
             .Paginate(pageNumber, pageSize)
+            .OrderBy(a => a.Title)
             .ToArrayAsync();
     }
 

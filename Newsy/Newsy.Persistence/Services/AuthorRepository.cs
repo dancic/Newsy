@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newsy.Abstractions.Models;
 using Newsy.Persistence.Contracts.Services;
 using Newsy.Persistence.Extensions;
+using Newsy.Persistence.Helpers;
 using Newsy.Persistence.Models;
 
 namespace Newsy.Persistence.Services;
@@ -14,11 +16,17 @@ public class AuthorRepository : IAuthorRepository
         this.context = context;
     }
 
-    public async Task<Author[]> GetAuthorsGridDataAsync(int pageNumber, int pageSize)
+    public async Task<BasicAuthorModel[]> GetAuthorsGridDataAsync(int pageNumber, int pageSize, IEnumerable<Filter> filters)
     {
         return await context.Authors
             .Include(a => a.ApplicationUser)
             .Where(a => a.DeletedAt == null)
+            .Select(a => new BasicAuthorModel()
+            {
+                Id = a.Id,
+                Name = a.ApplicationUser.FullName
+            })
+            .Where(FilterExpressionBuilder.GetFiltersExpression<BasicAuthorModel>(filters))
             .Paginate(pageNumber, pageSize)
             .ToArrayAsync();
     }
@@ -27,7 +35,7 @@ public class AuthorRepository : IAuthorRepository
     {
         return await context.Authors
             .Include(a => a.ApplicationUser)
-            .Include(a => a.Articles.Where(a => a.IsPublished || a.Author.ApplicationUserId == currentUserId))
+            .Include(a => a.Articles.Where(a => a.DeletedAt == null && (a.IsPublished || a.Author.ApplicationUserId == currentUserId)))
             .FirstOrDefaultAsync(a => a.Id == id && a.DeletedAt == null);
     }
 

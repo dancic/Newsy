@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Newsy.Abstractions.Models;
 using Newsy.API.DTOs.Requests;
 using Newsy.API.DTOs.Responses;
 using Newsy.Core.Models;
@@ -11,9 +12,7 @@ public class ArticleProfile : Profile
     public ArticleProfile()
     {
         CreateMap<UpsertArticleDto, UpsertArticleServiceModel>();
-        CreateMap<Article, BasicArticleViewModel>()
-            .ForMember(d => d.AuthorName, opt => opt.MapFrom(src => src.Author.ApplicationUser.FullName));
-        CreateMap<Article, ArticleViewModel>()
-            .ForMember(d => d.AuthorName, opt => opt.MapFrom(src => src.Author.ApplicationUser.FullName));
+        CreateMap<Article, BasicArticleModel>();
+        CreateMap<Article, ArticleViewModel>();
     }
 }

@@ -1,4 +1,5 @@
-﻿using Newsy.Core.Contracts.Services;
+﻿using Newsy.Abstractions.Models;
+using Newsy.Core.Contracts.Services;
 using Newsy.Core.Models;
 using Newsy.Persistence.Contracts.Services;
 using Newsy.Persistence.Models;
@@ -39,10 +40,10 @@ public class ArticleService : IArticleService
         return await articleRepository.GetByIdAsync(id, currentUserId);
     }
 
-    public async Task<Article[]> GetArticlesAsync(int pageNumber, int pageSize)
+    public async Task<BasicArticleModel[]> GetArticlesAsync(int pageNumber, int pageSize, IEnumerable<Filter> filters)
     {
         var currentUserId = authService.GetCurrentUserId();
-        return await articleRepository.GetArticleGridDataAsync(pageNumber, pageSize, currentUserId);
+        return await articleRepository.GetArticleGridDataAsync(pageNumber, pageSize, filters, currentUserId);
     }
 
     public async Task<Guid> CreateArticleAsync(UpsertArticleServiceModel upsertArticleServiceModel)

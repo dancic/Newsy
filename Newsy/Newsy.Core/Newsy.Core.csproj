@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Newsy.Abstractions\Newsy.Abstractions.csproj" />
     <ProjectReference Include="..\Newsy.Persistence\Newsy.Persistence.csproj" />
   </ItemGroup>
 

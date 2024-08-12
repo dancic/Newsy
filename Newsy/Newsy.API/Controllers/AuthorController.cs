@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newsy.Abstractions.Models;
 using Newsy.API.DTOs.Requests;
 using Newsy.API.DTOs.Responses;
 using Newsy.Core.Contracts.Services;
@@ -27,8 +28,8 @@ public class AuthorController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAuthorsAsync([FromQuery] GridDto gridParams)
     {
-        var authors = await authorService.GetAuthorsAsync(gridParams.PageNumber, gridParams.PageSize);
-        return Ok(mapper.Map<Author[], BasicAuthorViewModel[]>(authors));
+        var authors = await authorService.GetAuthorsAsync(gridParams.PageNumber, gridParams.PageSize, gridParams.Filters);
+        return Ok(authors);
     }
 
     [HttpGet("{id}")]

@@ -6,7 +6,6 @@ using Newsy.API.DTOs.Responses;
 using Newsy.Core.Contracts.Services;
 using Newsy.Core.Models;
 using Newsy.Persistence.Models;
-using System.Security.Claims;
 
 namespace Newsy.API.Controllers;
 
@@ -28,8 +27,8 @@ public class ArticleController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetArticlesAsync([FromQuery] GridDto gridParams)
     {
-        var articles = await articleService.GetArticlesAsync(gridParams.PageNumber, gridParams.PageSize);
-        return Ok(mapper.Map<Article[], BasicArticleViewModel[]>(articles));
+        var articles = await articleService.GetArticlesAsync(gridParams.PageNumber, gridParams.PageSize, gridParams.Filters);
+        return Ok(articles);
     }
 
     [HttpGet("{id}")]

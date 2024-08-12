@@ -1,3 +1,10 @@
-﻿namespace Newsy.API.DTOs.Requests;
+﻿using Newsy.Abstractions.Models;
 
-public sealed record GridDto(int PageNumber = 1, int PageSize = 10);
+namespace Newsy.API.DTOs.Requests;
+
+public class GridDto
+{
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+    public List<Filter> Filters { get; set; } = new List<Filter>();
+}

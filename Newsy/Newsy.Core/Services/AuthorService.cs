@@ -1,4 +1,5 @@
-﻿using Newsy.Core.Contracts.Services;
+﻿using Newsy.Abstractions.Models;
+using Newsy.Core.Contracts.Services;
 using Newsy.Core.Models;
 using Newsy.Persistence.Contracts.Services;
 using Newsy.Persistence.Models;
@@ -23,9 +24,9 @@ public class AuthorService : IAuthorService
         return await authorRepository.GetByIdAsync(id, currentUserId);
     }
 
-    public async Task<Author[]> GetAuthorsAsync(int pageNumber, int pageSize)
+    public async Task<BasicAuthorModel[]> GetAuthorsAsync(int pageNumber, int pageSize, IEnumerable<Filter> filters)
     {
-        return await authorRepository.GetAuthorsGridDataAsync(pageNumber, pageSize);
+        return await authorRepository.GetAuthorsGridDataAsync(pageNumber, pageSize, filters);
     }
 
     public async Task<bool> UpdateAuthorAsync(Guid id, UpsertAuthorServiceModel upsertAuthorServiceModel)

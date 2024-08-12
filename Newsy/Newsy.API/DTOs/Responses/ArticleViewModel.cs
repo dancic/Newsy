@@ -1,6 +1,8 @@
-﻿namespace Newsy.API.DTOs.Responses;
+﻿using Newsy.Abstractions.Models;
 
-public class ArticleViewModel : BasicArticleViewModel
+namespace Newsy.API.DTOs.Responses;
+
+public class ArticleViewModel : BasicArticleModel
 {
     public string Content { get; set; }
 }
