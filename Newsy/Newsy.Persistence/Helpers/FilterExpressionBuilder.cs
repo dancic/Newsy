@@ -1,4 +1,6 @@
-﻿using Newsy.Abstractions.Models;
+﻿using Newsy.Abstractions.Enums;
+using Newsy.Abstractions.Models;
+using Newsy.Persistence.Exceptions;
 using System.Linq.Expressions;
 
 namespace Newsy.Persistence.Helpers;
@@ -29,10 +31,36 @@ public static class FilterExpressionBuilder
     {
         var filterFieldExpression = BuildFilterFieldPropertyExpression(filter, param);
 
-        var propertyType = filterFieldExpression.Type;
-        var valueConverted = ConvertValue(filter.Value, propertyType);
+        Expression filterExpression;
+        if (filter.Type == OperatorType.Contains)
+        {
+            if (filterFieldExpression.Type != typeof(string)) //Contains operator available for string fields only
+            {
+                throw new InvalidFilterException("Contains filter can be done on string columns only");
+            }
 
-        var filterExpression = Expression.Equal(filterFieldExpression, Expression.Constant(valueConverted, propertyType));
+            var method = typeof(string).GetMethod("Contains", new[] { typeof(string) })!;
+            var valueExpression = Expression.Constant(filter.Value.ToLower(), typeof(string));
+
+            filterExpression = Expression.Call(filterFieldExpression, method, valueExpression);
+        }
+        else if (filter.Type == OperatorType.Equal)
+        {
+            var propertyType = filterFieldExpression.Type;
+
+            object valueConverted;
+            if (propertyType == typeof(string))
+                valueConverted = filter.Value.ToLower();
+            else
+                valueConverted = ConvertValue(filter.Value, propertyType);
+
+            filterExpression = Expression.Equal(filterFieldExpression, Expression.Constant(valueConverted, propertyType));
+        }
+        else 
+        {
+            throw new InvalidFilterException("Unsupported filter type.");
+        }
+
         return filterExpression;
     }
 
@@ -49,38 +77,34 @@ public static class FilterExpressionBuilder
                 }
                 catch (Exception)
                 {
-                    throw new Exception($"Provided invalid filter field name {filter.Field}");
+                    throw new InvalidFilterException($"Provided invalid filter field name '{filter.Field}'.");
                 }
 
                 return prop;
             });
 
         if (expr.Type == typeof(string))
-            expr = Expression.Call(expr, typeof(string).GetMethod("ToLower", Type.EmptyTypes)!);
+            expr = Expression.Call(expr, typeof(string).GetMethod("ToLower", System.Type.EmptyTypes)!);
 
         return expr;
     }
 
-    private static object? ConvertValue(string value, Type propType)
+    private static object ConvertValue(string value, System.Type propType)
     {
         if (propType == typeof(string))
         {
             return value.ToLower();
         }
 
-        if (propType == typeof(Guid?))
+        if (propType == typeof(Guid))
         {
-            if (value == null)
+            if (Guid.TryParse(value, out Guid result))
             {
-                return null;
-            }
-            else if (Guid.TryParse(value, out Guid result))
-            {
-                return (Guid?)result;
+                return result;
             }
             else
             {
-                throw new Exception($"Value: {value} must be in valid Guid format");
+                throw new InvalidFilterException($"Given value '{value}' must be in valid Guid format.");
             }
         }
 
