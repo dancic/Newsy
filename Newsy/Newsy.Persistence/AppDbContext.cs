@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Newsy.Abstractions;
 using Newsy.Persistence.Configurations;
 using Newsy.Persistence.Models;
 
@@ -24,11 +25,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         builder.ApplyConfiguration(new AuthorConfiguration());
 
         builder.Entity<IdentityRole>().HasData(
-            new IdentityRole 
-            { 
-                Id = Guid.NewGuid().ToString(), 
-                Name = "Author", 
-                NormalizedName = "AUTHOR".ToUpper() 
+            new IdentityRole
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = Constants.AuthorRoleName,
+                NormalizedName = Constants.AuthorRoleName.ToUpper()
             }
         );
     }

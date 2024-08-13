@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newsy.Abstractions;
 using Newsy.API.DTOs.Requests;
 using Newsy.API.DTOs.Responses;
 using Newsy.API.Extensions;
@@ -38,7 +39,7 @@ public class ArticleController : ControllerBase
         return getArticleResult.ToActionResult(article => mapper.Map<ArticleViewModel>(article));
     }
 
-    [Authorize(Roles = "Author")]
+    [Authorize(Roles = Constants.AuthorRoleName)]
     [HttpPost]
     public async Task<IActionResult> CreateArticleAsync([FromBody] UpsertArticleDto createArticleDto)
     {
@@ -46,7 +47,7 @@ public class ArticleController : ControllerBase
         return createArticleResult.ToActionResult();
     }
 
-    [Authorize(Roles = "Author")]
+    [Authorize(Roles = Constants.AuthorRoleName)]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateArticleAsync(Guid id, [FromBody] UpsertArticleDto updateArticleDto)
     {
@@ -54,7 +55,7 @@ public class ArticleController : ControllerBase
         return updateArticleResult.ToActionResult();
     }
 
-    [Authorize(Roles = "Author")]
+    [Authorize(Roles = Constants.AuthorRoleName)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteArticleAsync(Guid id)
     {

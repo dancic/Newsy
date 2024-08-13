@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newsy.Abstractions;
 using Newsy.API.DTOs.Requests;
 using Newsy.API.DTOs.Responses;
 using Newsy.API.Extensions;
@@ -38,7 +39,7 @@ public class AuthorController : ControllerBase
         return getAuthorResult.ToActionResult(author => mapper.Map<AuthorViewModel>(author));
     }
 
-    [Authorize(Roles = "Author")]
+    [Authorize(Roles = Constants.AuthorRoleName)]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAuthorAsync(Guid id, [FromBody] UpsertAuthorDto updateAuthorDto)
     {

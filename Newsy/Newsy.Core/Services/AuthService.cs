@@ -51,7 +51,7 @@ public class AuthService : IAuthService
 
         if (registerServiceModel.IsAuthor)
         {
-            await userManager.AddToRoleAsync(user, "Author");
+            await userManager.AddToRoleAsync(user, Constants.AuthorRoleName);
             var author = new Author() { Bio = registerServiceModel.Bio!, ApplicationUserId = user.Id };
             author.PrepareUpdate();
             await authorRepository.CreateAuthorAsync(author);
