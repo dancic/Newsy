@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using FluentResults;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Newsy.Abstractions;
 using Newsy.Core.Contracts.Services;
 using Newsy.Core.Models;
 using Newsy.Persistence.Contracts.Services;
@@ -33,7 +34,7 @@ public class AuthService : IAuthService
         this.httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<bool> RegisterNewUser(RegisterServiceModel registerServiceModel)
+    public async Task<Result> RegisterNewUser(RegisterServiceModel registerServiceModel)
     {
         var user = new ApplicationUser
         {
@@ -45,7 +46,7 @@ public class AuthService : IAuthService
         var result = await userManager.CreateAsync(user, registerServiceModel.Password);
         if (!result.Succeeded)
         {
-            return false;
+            return Result.Fail(new Error(string.Join(", ", result.Errors.Select(e => e.Code))).WithMetadata(Constants.StatusCodeMetadataName, 400));
         }
 
         if (registerServiceModel.IsAuthor)
@@ -56,24 +57,24 @@ public class AuthService : IAuthService
             await authorRepository.CreateAuthorAsync(author);
         }
 
-        return true;
+        return Result.Ok();
     }
 
-    public async Task<string?> ValidateCredsAndGetTokenAsync(string username, string password)
+    public async Task<Result<string>> ValidateCredsAndGetTokenAsync(string username, string password)
     {
         var user = await userManager.FindByNameAsync(username);
         if (user == null)
         {
-            return null;
+            return Result.Fail(new Error("User with given username does not exist.").WithMetadata(Constants.StatusCodeMetadataName, 401));
         }
 
         var result = await signInManager.PasswordSignInAsync(user, password, false, false);
         if (!result.Succeeded)
         {
-            return null;
+            return Result.Fail(new Error("Unable to login with provided credentials.").WithMetadata(Constants.StatusCodeMetadataName, 401));
         }
 
-        return await GenerateJwtToken(user);
+        return Result.Ok(await GenerateJwtToken(user));
     }
 
     public string GetCurrentUserId() => userManager.GetUserId(httpContextAccessor.HttpContext.User);

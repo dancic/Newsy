@@ -1,9 +1,10 @@
-﻿using Newsy.Core.Models;
+﻿using FluentResults;
+using Newsy.Core.Models;
 
 namespace Newsy.Core.Contracts.Services;
 public interface IAuthService
 {
-    Task<bool> RegisterNewUser(RegisterServiceModel registerServiceModel);
-    Task<string?> ValidateCredsAndGetTokenAsync(string username, string password);
+    Task<Result> RegisterNewUser(RegisterServiceModel registerServiceModel);
+    Task<Result<string>> ValidateCredsAndGetTokenAsync(string username, string password);
     string GetCurrentUserId();
 }

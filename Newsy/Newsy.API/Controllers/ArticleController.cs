@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newsy.API.DTOs.Requests;
 using Newsy.API.DTOs.Responses;
+using Newsy.API.Extensions;
 using Newsy.Core.Contracts.Services;
 using Newsy.Core.Models;
-using Newsy.Persistence.Models;
 
 namespace Newsy.API.Controllers;
 
@@ -27,20 +27,15 @@ public class ArticleController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetArticlesAsync([FromQuery] GridDto gridParams)
     {
-        var articles = await articleService.GetArticlesAsync(gridParams.PageNumber, gridParams.PageSize, gridParams.Filters);
-        return Ok(articles);
+        var getArticlesResult = await articleService.GetArticlesAsync(gridParams.PageNumber, gridParams.PageSize, gridParams.Filters);
+        return getArticlesResult.ToActionResult();
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetArticleAsync(Guid id)
     {
-        var article = await articleService.GetArticleByIdAsync(id);
-        if (article == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(mapper.Map<ArticleViewModel>(article));
+        var getArticleResult = await articleService.GetArticleByIdAsync(id);
+        return getArticleResult.ToActionResult(article => mapper.Map<ArticleViewModel>(article));
     }
 
     [Authorize(Roles = "Author")]
@@ -52,8 +47,8 @@ public class ArticleController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var articleId = await articleService.CreateArticleAsync(mapper.Map<UpsertArticleServiceModel>(createArticleDto));
-        return Ok(new { id = articleId });
+        var createArticleResult = await articleService.CreateArticleAsync(mapper.Map<UpsertArticleServiceModel>(createArticleDto));
+        return createArticleResult.ToActionResult();
     }
 
     [Authorize(Roles = "Author")]
@@ -65,25 +60,15 @@ public class ArticleController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var result = await articleService.UpdateArticleAsync(id, mapper.Map<UpsertArticleServiceModel>(updateArticleDto));
-        if (!result)
-        {
-            return NotFound();
-        }
-
-        return NoContent();
+        var updateArticleResult = await articleService.UpdateArticleAsync(id, mapper.Map<UpsertArticleServiceModel>(updateArticleDto));
+        return updateArticleResult.ToActionResult();
     }
 
     [Authorize(Roles = "Author")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteArticleAsync(Guid id)
     {
-        var result = await articleService.DeleteArticleAsync(id);
-        if (!result)
-        {
-            return NotFound();
-        }
-
-        return NoContent();
+        var deleteArticleResult = await articleService.DeleteArticleAsync(id);
+        return deleteArticleResult.ToActionResult();
     }
 }

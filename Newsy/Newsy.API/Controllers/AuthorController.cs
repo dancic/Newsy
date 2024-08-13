@@ -1,12 +1,11 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newsy.Abstractions.Models;
 using Newsy.API.DTOs.Requests;
 using Newsy.API.DTOs.Responses;
+using Newsy.API.Extensions;
 using Newsy.Core.Contracts.Services;
 using Newsy.Core.Models;
-using Newsy.Persistence.Models;
 
 namespace Newsy.API.Controllers;
 
@@ -28,20 +27,15 @@ public class AuthorController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAuthorsAsync([FromQuery] GridDto gridParams)
     {
-        var authors = await authorService.GetAuthorsAsync(gridParams.PageNumber, gridParams.PageSize, gridParams.Filters);
-        return Ok(authors);
+        var authorsResult = await authorService.GetAuthorsAsync(gridParams.PageNumber, gridParams.PageSize, gridParams.Filters);
+        return authorsResult.ToActionResult();
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetAuthorAsync(Guid id)
     {
-        var author = await authorService.GetAuthorAsync(id);
-        if (author == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(mapper.Map<AuthorViewModel>(author));
+        var getAuthorResult = await authorService.GetAuthorAsync(id);
+        return getAuthorResult.ToActionResult(author => mapper.Map<AuthorViewModel>(author));
     }
 
     [Authorize(Roles = "Author")]
@@ -53,13 +47,7 @@ public class AuthorController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var result = await authorService.UpdateAuthorAsync(id, mapper.Map<UpsertAuthorServiceModel>(updateAuthorDto));
-        
-        if (!result)
-        {
-            return NotFound();
-        }
-
-        return NoContent();
+        var updateAuthorResult = await authorService.UpdateAuthorAsync(id, mapper.Map<UpsertAuthorServiceModel>(updateAuthorDto));
+        return updateAuthorResult.ToActionResult();
     }
 }

@@ -1,7 +1,10 @@
-﻿using Newsy.Abstractions.Models;
+﻿using FluentResults;
+using Newsy.Abstractions;
+using Newsy.Abstractions.Models;
 using Newsy.Core.Contracts.Services;
 using Newsy.Core.Models;
 using Newsy.Persistence.Contracts.Services;
+using Newsy.Persistence.Exceptions;
 using Newsy.Persistence.Models;
 
 namespace Newsy.Core.Services;
@@ -21,32 +24,31 @@ public class ArticleService : IArticleService
         this.authService = authService;
     }
 
-    public async Task<bool> DeleteArticleAsync(Guid id)
+    public async Task<Result<Article?>> GetArticleByIdAsync(Guid id)
     {
         var currentUserId = authService.GetCurrentUserId();
-        var articleToDelete = await articleRepository.GetByIdAsync(id, currentUserId);
+        return Result.Ok(await articleRepository.GetByIdAsync(id, currentUserId));
+    }
 
-        if (articleToDelete == null || articleToDelete.Author.ApplicationUserId != currentUserId)
+    public async Task<Result<BasicArticleModel[]>> GetArticlesAsync(int pageNumber, int pageSize, IEnumerable<Filter> filters)
+    {
+        var currentUserId = authService.GetCurrentUserId();
+        try
         {
-            return false;
+            var articles = await articleRepository.GetArticleGridDataAsync(pageNumber, pageSize, filters, currentUserId);
+            return Result.Ok(articles);
         }
-
-        return await articleRepository.SoftDeleteArticleAsync(articleToDelete, articleToDelete.Author.ApplicationUser.FullName);
+        catch (InvalidFilterException ex)
+        {
+            return Result.Fail(new Error(ex.Message).WithMetadata(Constants.StatusCodeMetadataName, 400));
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(new Error(ex.Message).WithMetadata(Constants.StatusCodeMetadataName, 500));
+        }
     }
 
-    public async Task<Article?> GetArticleByIdAsync(Guid id)
-    {
-        var currentUserId = authService.GetCurrentUserId();
-        return await articleRepository.GetByIdAsync(id, currentUserId);
-    }
-
-    public async Task<BasicArticleModel[]> GetArticlesAsync(int pageNumber, int pageSize, IEnumerable<Filter> filters)
-    {
-        var currentUserId = authService.GetCurrentUserId();
-        return await articleRepository.GetArticleGridDataAsync(pageNumber, pageSize, filters, currentUserId);
-    }
-
-    public async Task<Guid> CreateArticleAsync(UpsertArticleServiceModel upsertArticleServiceModel)
+    public async Task<Result<Guid>> CreateArticleAsync(UpsertArticleServiceModel upsertArticleServiceModel)
     {
         var currentUserId = authService.GetCurrentUserId();
         var author = await authorRepository.GetByUserIdAsync(currentUserId);
@@ -60,17 +62,22 @@ public class ArticleService : IArticleService
             LastPublishedDateTime = upsertArticleServiceModel.IsPublished ? DateTime.UtcNow : null
         };
 
-        return await articleRepository.AddArticleAsync(article, author.ApplicationUser.FullName);
+        return Result.Ok(await articleRepository.AddArticleAsync(article, author.ApplicationUser.FullName));
     }
 
-    public async Task<bool> UpdateArticleAsync(Guid id, UpsertArticleServiceModel upsertArticleServiceModel)
+    public async Task<Result> UpdateArticleAsync(Guid id, UpsertArticleServiceModel upsertArticleServiceModel)
     {
         var currentUserId = authService.GetCurrentUserId();
         var articleToUpdate = await articleRepository.GetByIdAsync(id, currentUserId);
 
-        if (articleToUpdate == null || articleToUpdate.Author.ApplicationUserId != currentUserId)
+        if (articleToUpdate == null)
         {
-            return false;
+            return Result.Fail(new Error("There is no article with given id.").WithMetadata(Constants.StatusCodeMetadataName, 404));
+        }
+
+        if (articleToUpdate.Author.ApplicationUserId != currentUserId)
+        {
+            return Result.Fail(new Error("Only author can update article.").WithMetadata(Constants.StatusCodeMetadataName, 403));
         }
 
         articleToUpdate.Title = upsertArticleServiceModel.Title;
@@ -79,7 +86,25 @@ public class ArticleService : IArticleService
         articleToUpdate.IsPublished = upsertArticleServiceModel.IsPublished;
 
         await articleRepository.UpdateArticleAsync(articleToUpdate, articleToUpdate.Author.ApplicationUser.FullName);
+        return Result.Ok();
+    }
 
-        return true;
+    public async Task<Result> DeleteArticleAsync(Guid id)
+    {
+        var currentUserId = authService.GetCurrentUserId();
+        var articleToDelete = await articleRepository.GetByIdAsync(id, currentUserId);
+
+        if (articleToDelete == null)
+        {
+            return Result.Fail(new Error("There is no article with given id.").WithMetadata(Constants.StatusCodeMetadataName, 404));
+        }
+
+        if (articleToDelete.Author.ApplicationUserId != currentUserId)
+        {
+            return Result.Fail(new Error("Only author can update article.").WithMetadata(Constants.StatusCodeMetadataName, 403));
+        }
+
+        await articleRepository.SoftDeleteArticleAsync(articleToDelete, articleToDelete.Author.ApplicationUser.FullName);
+        return Result.Ok();
     }
 }

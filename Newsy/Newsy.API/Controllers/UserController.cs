@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Newsy.API.DTOs.Requests;
+using Newsy.API.Extensions;
 using Newsy.Core.Contracts.Services;
 using Newsy.Core.Models;
 
@@ -31,24 +32,13 @@ public class UserController : ControllerBase
         var registrationServiceModel = mapper.Map<RegisterServiceModel>(registerDto);
         var registrationResult = await authService.RegisterNewUser(registrationServiceModel);
 
-        if (registrationResult)
-        {
-            return Ok("User registered successfully");
-        }
-
-        return BadRequest();
+        return registrationResult.ToActionResult();
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        var token = await authService.ValidateCredsAndGetTokenAsync(loginDto.Username, loginDto.Password);
-
-        if (token == null)
-        {
-            return Unauthorized();
-        }
-
-        return Ok(new { Token = token });
+        var tokenResult = await authService.ValidateCredsAndGetTokenAsync(loginDto.Username, loginDto.Password);
+        return tokenResult.ToActionResult();
     }
 }
