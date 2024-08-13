@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Newsy.Core", "Newsy.Core\Ne
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Newsy.Persistence", "Newsy.Persistence\Newsy.Persistence.csproj", "{2D351F24-F6A6-4D9A-ADAC-C45C6939F5EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Newsy.Abstractions", "Newsy.Abstractions\Newsy.Abstractions.csproj", "{25089607-0543-45DE-8257-5B4B43742163}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Newsy.Abstractions", "Newsy.Abstractions\Newsy.Abstractions.csproj", "{25089607-0543-45DE-8257-5B4B43742163}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Newsy.UnitTests", "Newsy.UnitTests\Newsy.UnitTests.csproj", "{F6096912-A567-4C14-A5A7-D4AA74C5466F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{25089607-0543-45DE-8257-5B4B43742163}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25089607-0543-45DE-8257-5B4B43742163}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{25089607-0543-45DE-8257-5B4B43742163}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6096912-A567-4C14-A5A7-D4AA74C5466F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6096912-A567-4C14-A5A7-D4AA74C5466F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6096912-A567-4C14-A5A7-D4AA74C5466F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6096912-A567-4C14-A5A7-D4AA74C5466F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

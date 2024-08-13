@@ -23,12 +23,12 @@ public class AuthorService : IAuthorService
     public async Task<Result<Author?>> GetAuthorAsync(Guid id)
     {
         var currentUserId = authService.GetCurrentUserId();
-        return await authorRepository.GetByIdAsync(id, currentUserId);
+        return Result.Ok(await authorRepository.GetByIdAsync(id, currentUserId));
     }
 
     public async Task<Result<BasicAuthorModel[]>> GetAuthorsAsync(int pageNumber, int pageSize, IEnumerable<Filter> filters)
     {
-        return await authorRepository.GetAuthorsGridDataAsync(pageNumber, pageSize, filters);
+        return Result.Ok(await authorRepository.GetAuthorsGridDataAsync(pageNumber, pageSize, filters));
     }
 
     public async Task<Result> UpdateAuthorAsync(Guid id, UpsertAuthorServiceModel upsertAuthorServiceModel)
