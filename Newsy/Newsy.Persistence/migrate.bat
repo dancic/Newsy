@@ -1,0 +1,1 @@
+call dotnet ef database update --startup-project ../Newsy.API --project ./
