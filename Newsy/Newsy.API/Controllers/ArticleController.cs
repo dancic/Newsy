@@ -42,11 +42,6 @@ public class ArticleController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateArticleAsync([FromBody] UpsertArticleDto createArticleDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
         var createArticleResult = await articleService.CreateArticleAsync(mapper.Map<UpsertArticleServiceModel>(createArticleDto));
         return createArticleResult.ToActionResult();
     }
@@ -55,11 +50,6 @@ public class ArticleController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateArticleAsync(Guid id, [FromBody] UpsertArticleDto updateArticleDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
         var updateArticleResult = await articleService.UpdateArticleAsync(id, mapper.Map<UpsertArticleServiceModel>(updateArticleDto));
         return updateArticleResult.ToActionResult();
     }

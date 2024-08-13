@@ -1,3 +1,7 @@
 ﻿namespace Newsy.API.DTOs.Requests;
 
-public sealed record UpsertAuthorDto(string Name, string Bio);
+public class UpsertAuthorDto
+{
+    public string Name { get; set; }
+    public string Bio { get; set; }
+}

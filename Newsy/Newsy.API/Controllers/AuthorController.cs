@@ -42,11 +42,6 @@ public class AuthorController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAuthorAsync(Guid id, [FromBody] UpsertAuthorDto updateAuthorDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
         var updateAuthorResult = await authorService.UpdateAuthorAsync(id, mapper.Map<UpsertAuthorServiceModel>(updateAuthorDto));
         return updateAuthorResult.ToActionResult();
     }

@@ -24,11 +24,6 @@ public class UserController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
         var registrationServiceModel = mapper.Map<RegisterServiceModel>(registerDto);
         var registrationResult = await authService.RegisterNewUser(registrationServiceModel);
 
